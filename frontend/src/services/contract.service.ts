@@ -1,32 +1,58 @@
-const API = "/api/contracts"
+// frontend/src/services/contracts.service.ts
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || ""
+const API_PATH = "/api/contracts"
+
+/* -----------------------------
+   Auth helper
+------------------------------ */
 function getToken() {
   const token = localStorage.getItem("token")
   if (!token) throw new Error("Not authenticated")
   return token
 }
 
-export async function getContracts() {
-  const res = await fetch(API, {
-    headers: {
-      Authorization: `Bearer ${getToken()}`,
-    },
-  })
+function logout() {
+  localStorage.removeItem("token")
+  window.location.href = "/login"
+}
 
+/* -----------------------------
+   Response handler
+------------------------------ */
+async function handleAuthResponse(res: Response) {
   if (res.status === 401) {
-    localStorage.removeItem("token")
-    window.location.href = "/login"
+    logout()
+    throw new Error("Unauthorized")
   }
 
   if (!res.ok) {
-    throw new Error("Failed to load contracts")
+    let message = "Request failed"
+    try {
+      const err = await res.json()
+      message = err.message || message
+    } catch (_) {}
+    throw new Error(message)
   }
 
   return res.json()
 }
 
+/* -----------------------------
+   API calls
+------------------------------ */
+export async function getContracts() {
+  const res = await fetch(`${API_BASE}${API_PATH}`, {
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+  })
+
+  return handleAuthResponse(res)
+}
+
 export async function createContract(payload: any) {
-  const res = await fetch(API, {
+  const res = await fetch(`${API_BASE}${API_PATH}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -35,15 +61,5 @@ export async function createContract(payload: any) {
     body: JSON.stringify(payload),
   })
 
-  if (res.status === 401) {
-    localStorage.removeItem("token")
-    window.location.href = "/login"
-  }
-
-  if (!res.ok) {
-    const err = await res.json()
-    throw new Error(err.message || "Create contract failed")
-  }
-
-  return res.json()
+  return handleAuthResponse(res)
 }
