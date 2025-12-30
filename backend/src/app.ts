@@ -4,6 +4,9 @@ import cors from "cors"
 import authRoutes from "./routes/auth"
 import contractRoutes from "./routes/contracts"
 import pdfRoutes from "./routes/pdf"
+import { Request, Response } from "express"
+
+
 const app = express()
 
 app.use(cors())
