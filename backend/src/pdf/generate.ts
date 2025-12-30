@@ -1,37 +1,20 @@
-import puppeteer from "puppeteer"
-import fs from "fs"
-import path from "path"
-import Handlebars from "handlebars"
+import puppeteer from "puppeteer-core"
 
 export async function generatePdfBuffer(
-  templateName: string,
-  data: any
+  html: string
 ): Promise<Buffer> {
-  const templatePath = path.join(
-    __dirname,
-    "templates",
-    templateName
-  )
-
-  const html = fs.readFileSync(templatePath, "utf8")
-  const template = Handlebars.compile(html)
-  const content = template(data)
-
   const browser = await puppeteer.launch({
+    executablePath: process.env.CHROME_PATH,
     headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    args: ["--no-sandbox", "--disable-setuid-sandbox"]
   })
 
   const page = await browser.newPage()
-  await page.setContent(content, { waitUntil: "networkidle0" })
+  await page.setContent(html, { waitUntil: "networkidle0" })
 
-  const pdfUint8 = await page.pdf({
-    format: "A4",
-    printBackground: true,
-  })
+  const pdf = await page.pdf({ format: "A4" })
 
   await browser.close()
 
-  // ✅ FIX: Convert Uint8Array → Buffer
-  return Buffer.from(pdfUint8)
+  return Buffer.from(pdf)
 }
