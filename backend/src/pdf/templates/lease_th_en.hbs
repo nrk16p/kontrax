@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <style>
+    body { font-family: "TH Sarabun New", "Sarabun", Arial, sans-serif; font-size: 14px; line-height: 1.45; }
+    h1 { font-size: 20px; text-align: center; margin: 0 0 8px; }
+    h2 { font-size: 16px; margin: 14px 0 6px; }
+    .muted { color: #666; }
+    .box { border: 1px solid #ddd; padding: 10px; border-radius: 8px; }
+    .row { display: flex; gap: 12px; }
+    .col { flex: 1; }
+    .hr { border-top: 1px solid #ddd; margin: 12px 0; }
+    .sign { margin-top: 22px; display: flex; gap: 40px; justify-content: space-between; }
+    .sigbox { width: 48%; border-top: 1px solid #333; padding-top: 6px; text-align: center; }
+    .small { font-size: 12px; }
+  </style>
+</head>
+<body>
+
+<h1>สัญญาเช่า / Lease Agreement</h1>
+<div class="muted small" style="text-align:center">
+  เลขที่สัญญา (Contract No.): {{contract.contractNo}} &nbsp; | &nbsp;
+  วันที่จัดทำ (Date): {{today}}
+</div>
+
+<div class="hr"></div>
+
+<h2>1) คู่สัญญา / Parties</h2>
+<div class="box">
+  <p><b>ผู้ให้เช่า (Lessor)</b>: {{owner.name}} <span class="muted">({{owner.idNo}})</span></p>
+  <p class="muted small">ที่อยู่ / Address: {{owner.address}}</p>
+
+  <div class="hr"></div>
+
+  <p><b>ผู้เช่า (Lessee)</b>: {{tenant.name}}</p>
+  <p class="muted small">Email: {{tenant.email}} | Phone: {{tenant.phone}}</p>
+</div>
+
+<h2>2) ทรัพย์สินที่เช่า / Premises</h2>
+<div class="box">
+  <p><b>ประเภท (Type)</b>: {{property.type}}</p>
+  <p><b>ที่อยู่ (Address)</b>: {{property.address}}</p>
+</div>
+
+<h2>3) ระยะเวลาเช่า / Term</h2>
+<div class="box row">
+  <div class="col">
+    <p><b>เริ่ม (Start)</b>: {{term.startDate}}</p>
+  </div>
+  <div class="col">
+    <p><b>สิ้นสุด (End)</b>: {{term.endDate}}</p>
+  </div>
+</div>
+
+<h2>4) ค่าเช่าและการชำระเงิน / Rent & Payment</h2>
+<div class="box">
+  <p><b>ค่าเช่ารายเดือน (Monthly Rent)</b>: {{payment.rentAmount}}</p>
+  <p><b>เงินประกัน (Security Deposit)</b>: {{payment.deposit}}</p>
+  <p><b>กำหนดชำระ (Due Day)</b>: {{payment.dueDate}}</p>
+  <p class="muted small"><b>วิธีชำระ (Instructions)</b>: {{payment.instructions}}</p>
+</div>
+
+<h2>5) เงื่อนไขเพิ่มเติม / Additional Terms</h2>
+<div class="box">
+  <p style="white-space: pre-wrap;">{{notes}}</p>
+</div>
+
+<h2>6) การยืนยันและลายมือชื่อ / Signatures</h2>
+<div class="muted small">
+  เอกสารนี้อาจถูกลงนามด้วยวิธีอิเล็กทรอนิกส์และมีผลผูกพันตามกฎหมายที่เกี่ยวข้อง /
+  This document may be electronically signed and legally binding.
+</div>
+
+<div class="sign">
+  <div class="sigbox">
+    ผู้ให้เช่า / Lessor<br/>
+    ({{owner.name}})
+  </div>
+  <div class="sigbox">
+    ผู้เช่า / Lessee<br/>
+    ({{tenant.name}})
+  </div>
+</div>
+
+</body>
+</html>
