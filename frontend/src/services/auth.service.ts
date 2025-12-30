@@ -1,6 +1,18 @@
 // frontend/src/services/auth.service.ts
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL
+const API_BASE = import.meta.env.VITE_API_BASE_URL || ""
+
+async function handleResponse(res: Response) {
+  if (!res.ok) {
+    let message = "Request failed"
+    try {
+      const err = await res.json()
+      message = err.message || message
+    } catch (_) {}
+    throw new Error(message)
+  }
+  return res.json()
+}
 
 export async function login(email: string, password: string) {
   const res = await fetch(`${API_BASE}/api/auth/login`, {
@@ -11,12 +23,7 @@ export async function login(email: string, password: string) {
     body: JSON.stringify({ email, password }),
   })
 
-  if (!res.ok) {
-    const err = await res.json()
-    throw new Error(err.message || "Login failed")
-  }
-
-  return res.json()
+  return handleResponse(res)
 }
 
 export async function register(payload: {
@@ -33,10 +40,5 @@ export async function register(payload: {
     body: JSON.stringify(payload),
   })
 
-  if (!res.ok) {
-    const err = await res.json()
-    throw new Error(err.message || "Register failed")
-  }
-
-  return res.json()
+  return handleResponse(res)
 }
