@@ -610,7 +610,7 @@ export function CreateContract() {
                       className={errors.tenantIdNo ? "border-red-500" : ""}
                     />
                     <ErrorText>{errors.tenantIdNo}</ErrorText>
-                    <HelpText>เลขบัตรประชาชน 13 หลัก</HelpText>
+                    <HelpText>เลขบัตรประชาชน 13 หลัก (ไม่ต้องใส่ขีด)</HelpText>
                   </div>
 
                   <div>
