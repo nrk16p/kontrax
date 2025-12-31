@@ -213,6 +213,9 @@ const validateStep = (step: number, form: ContractForm): ValidationErrors => {
     if (!form.parties.landlord.fullName.trim()) {
       errors.landlordName = "Landlord name is required"
     }
+    if (!form.parties.landlord.idNo.trim()) { 
+      errors.landlordName = "Landlord idNo is required"
+    }
     if (!form.parties.landlord.phone.trim()) {
       errors.landlordPhone = "Landlord phone is required"
     } else if (!isValidPhone(form.parties.landlord.phone)) {
