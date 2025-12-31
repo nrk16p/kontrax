@@ -1,8 +1,12 @@
-module.exports = {content: [
-  './index.html',
-  './src/**/*.{js,ts,jsx,tsx}'
-],
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+
   darkMode: "selector",
+
   theme: {
     container: {
       center: true,
@@ -11,13 +15,18 @@ module.exports = {content: [
         "2xl": "1400px",
       },
     },
+
     extend: {
+      /* ==============================
+         🌈 COLORS (unchanged)
+      ============================== */
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
@@ -47,11 +56,37 @@ module.exports = {content: [
           foreground: "hsl(var(--card-foreground))",
         },
       },
+
+      /* ==============================
+         🔤 FONT (Thai-ready)
+      ============================== */
+      fontFamily: {
+        sans: [
+          "Noto Sans Thai",
+          "ui-sans-serif",
+          "system-ui",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "Segoe UI",
+          "Roboto",
+          "Helvetica Neue",
+          "Arial",
+          "sans-serif",
+        ],
+      },
+
+      /* ==============================
+         🔲 BORDER RADIUS
+      ============================== */
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+
+      /* ==============================
+         🎞️ ANIMATIONS
+      ============================== */
       keyframes: {
         "caret-blink": {
           "0%,70%,100%": { opacity: "1" },
@@ -66,6 +101,7 @@ module.exports = {content: [
           to: { height: 0 },
         },
       },
+
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
@@ -73,4 +109,6 @@ module.exports = {content: [
       },
     },
   },
+
+  plugins: [],
 }

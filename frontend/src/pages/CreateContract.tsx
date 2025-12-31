@@ -514,15 +514,41 @@ export function CreateContract() {
                   </div>
 
                   <div>
-                    <Label>ID Number</Label>
+                    <Label>
+                      ID Number <span className="text-red-500">*</span>
+                    </Label>
+
                     <Input
+                      required
                       value={form.parties.landlord.idNo}
-                      onChange={(e) => update("parties.landlord.idNo", e.target.value)}
+                      onChange={(e) =>
+                        update("parties.landlord.idNo", e.target.value)
+                      }
                       placeholder="1-2345-67890-12-3"
                       maxLength={17}
+                      inputMode="numeric"
+                      className={
+                        form.parties.landlord.idNo &&
+                        form.parties.landlord.idNo.replace(/\D/g, "").length !== 13
+                          ? "border-red-500 focus-visible:ring-red-500"
+                          : ""
+                      }
                     />
-                    <HelpText>เลขบัตรประชาชน 13 หลัก</HelpText>
+
+                    {form.parties.landlord.idNo &&
+                      form.parties.landlord.idNo.replace(/\D/g, "").length !== 13 && (
+                        <HelpText className="text-red-500">
+                          ❌ กรุณากรอกเลขบัตรประชาชนให้ครบ 13 หลัก
+                        </HelpText>
+                      )}
+
+                    {!form.parties.landlord.idNo && (
+                      <HelpText>
+                        เลขบัตรประชาชน 13 หลัก
+                      </HelpText>
+                    )}
                   </div>
+
 
                   <div>
                     <Label>Address</Label>
