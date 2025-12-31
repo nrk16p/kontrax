@@ -432,6 +432,13 @@ export function CreateContract() {
     notes: "",
   })
 
+  /* ================= DERIVED VALUES ================= */
+
+  const duration =
+    form.term.startDate && form.term.endDate
+      ? diffYearsMonths(form.term.startDate, form.term.endDate)
+      : null
+
   // Auto-save to localStorage
   useEffect(() => {
     const timer = setTimeout(() => {
