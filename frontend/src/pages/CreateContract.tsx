@@ -207,14 +207,23 @@ const validateStep = (step: number, form: ContractForm): ValidationErrors => {
   
   // Phone validation helper (Thai format)
   const isValidPhone = (phone: string) => /^[0-9]{9,10}$/.test(phone.replace(/[-\s]/g, ""))
+  // Thai National ID (13 digits)
+  const isValidThaiId = (id: string) =>
+    /^[0-9]{13}$/.test(id.replace(/[-\s]/g, ""))
 
   if (step === 1) {
     // Landlord validation
     if (!form.parties.landlord.fullName.trim()) {
       errors.landlordName = "Landlord name is required"
     }
-    if (!form.parties.landlord.idNo.trim()) { 
-      errors.landlordName = "Landlord idNo is required"
+    if (!form.parties.landlord.idNo.trim()) {
+      errors.landlordIdNo = "Landlord ID number is required"
+    } else if (!isValidThaiId(form.parties.landlord.idNo)) {
+      errors.landlordIdNo = "ID number must be 13 digits"
+    }
+
+    if (!form.parties.landlord.address.trim()) {
+      errors.landlordAddress = "Landlord address is required"
     }
     if (!form.parties.landlord.phone.trim()) {
       errors.landlordPhone = "Landlord phone is required"
@@ -225,6 +234,15 @@ const validateStep = (step: number, form: ContractForm): ValidationErrors => {
     // Tenant validation
     if (!form.parties.tenant.fullName.trim()) {
       errors.tenantName = "Tenant name is required"
+    }
+    if (!form.parties.tenant.idNo.trim()) {
+      errors.tenantIdNo = "Tenant ID number is required"
+    } else if (!isValidThaiId(form.parties.tenant.idNo)) {
+      errors.tenantIdNo = "ID number must be 13 digits"
+    }
+
+    if (!form.parties.tenant.address.trim()) {
+      errors.tenantAddress = "Tenant address is required"
     }
     if (!form.parties.tenant.phone.trim()) {
       errors.tenantPhone = "Tenant phone is required"
@@ -521,10 +539,12 @@ export function CreateContract() {
                     <Input
                       value={form.parties.landlord.idNo}
                       onChange={(e) => update("parties.landlord.idNo", e.target.value)}
-                      placeholder="1-2345-67890-12-3"
-                      maxLength={17}
+                      placeholder="1234567890123"
+                      maxLength={13}
+                      className={errors.landlordIdNo ? "border-red-500" : ""}
                     />
-                    <HelpText>เลขบัตรประชาชน 13 หลัก</HelpText>
+                    <ErrorText>{errors.landlordIdNo}</ErrorText>
+                    <HelpText>เลขบัตรประชาชน 13 หลัก (ไม่ต้องใส่ขีด)</HelpText>
                   </div>
 
                   <div>
