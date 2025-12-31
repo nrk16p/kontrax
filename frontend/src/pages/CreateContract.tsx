@@ -548,13 +548,15 @@ export function CreateContract() {
                   </div>
 
                   <div>
-                    <Label>Address</Label>
+                    <Req>Address</Req>
                     <Textarea
                       value={form.parties.landlord.address}
                       onChange={(e) => update("parties.landlord.address", e.target.value)}
                       placeholder="123 Main Street, Bangkok"
                       rows={2}
+                      className={errors.landlordAddress ? "border-red-500" : ""}
                     />
+                    <ErrorText>{errors.landlordAddress}</ErrorText>
                     <HelpText>ที่อยู่ตามบัตรประชาชน</HelpText>
                   </div>
 
@@ -599,24 +601,28 @@ export function CreateContract() {
                   </div>
 
                   <div>
-                    <Label>ID Number</Label>
+                    <Req>ID Number</Req>
                     <Input
                       value={form.parties.tenant.idNo}
                       onChange={(e) => update("parties.tenant.idNo", e.target.value)}
-                      placeholder="1-2345-67890-12-3"
-                      maxLength={17}
+                      placeholder="1234567890123"
+                      maxLength={13}
+                      className={errors.tenantIdNo ? "border-red-500" : ""}
                     />
+                    <ErrorText>{errors.tenantIdNo}</ErrorText>
                     <HelpText>เลขบัตรประชาชน 13 หลัก</HelpText>
                   </div>
 
                   <div>
-                    <Label>Address</Label>
+                    <Req>Address</Req>
                     <Textarea
                       value={form.parties.tenant.address}
                       onChange={(e) => update("parties.tenant.address", e.target.value)}
                       placeholder="456 Second Street, Bangkok"
                       rows={2}
+                      className={errors.tenantAddress ? "border-red-500" : ""}
                     />
+                    <ErrorText>{errors.tenantAddress}</ErrorText>
                     <HelpText>ที่อยู่ตามบัตรประชาชน</HelpText>
                   </div>
 
