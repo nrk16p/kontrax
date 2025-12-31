@@ -922,6 +922,64 @@ export function CreateContract() {
                   </div>
                 </div>
               )}
+
+              {/* ===== Property Rules & Restrictions ===== */}
+              <div className="pt-4 border-t">
+                <h3 className="font-semibold mb-3">
+                  Property Rules & Restrictions
+                </h3>
+
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-2 p-3 border rounded-lg">
+                    <Checkbox
+                      id="pets"
+                      checked={form.rules.petsAllowed}
+                      onCheckedChange={(checked) =>
+                        update("rules.petsAllowed", checked)
+                      }
+                    />
+                    <Label htmlFor="pets" className="cursor-pointer flex-1">
+                      <div className="font-medium">Pets Allowed</div>
+                      <div className="text-xs text-slate-500">
+                        อนุญาตให้เลี้ยงสัตว์เลี้ยง
+                      </div>
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2 p-3 border rounded-lg">
+                    <Checkbox
+                      id="smoking"
+                      checked={form.rules.smokingAllowed}
+                      onCheckedChange={(checked) =>
+                        update("rules.smokingAllowed", checked)
+                      }
+                    />
+                    <Label htmlFor="smoking" className="cursor-pointer flex-1">
+                      <div className="font-medium">Smoking Allowed</div>
+                      <div className="text-xs text-slate-500">
+                        อนุญาตให้สูบบุหรี่
+                      </div>
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2 p-3 border rounded-lg">
+                    <Checkbox
+                      id="sublease"
+                      checked={form.rules.subleaseAllowed}
+                      onCheckedChange={(checked) =>
+                        update("rules.subleaseAllowed", checked)
+                      }
+                    />
+                    <Label htmlFor="sublease" className="cursor-pointer flex-1">
+                      <div className="font-medium">Sublease Allowed</div>
+                      <div className="text-xs text-slate-500">
+                        อนุญาตให้ให้เช่าช่วง
+                      </div>
+                    </Label>
+                  </div>
+                </div>
+              </div>
+
             </CardContent>
 
             <CardFooter className="justify-between">
@@ -999,54 +1057,7 @@ export function CreateContract() {
                 </div>
               </div>
 
-              <div>
-                <h3 className="font-semibold mb-3">Property Rules & Restrictions</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                    <Checkbox
-                      id="pets"
-                      checked={form.rules.petsAllowed}
-                      onCheckedChange={(checked) =>
-                        update("rules.petsAllowed", checked)
-                      }
-                    />
-                    <Label htmlFor="pets" className="cursor-pointer flex-1">
-                      <div className="font-medium">Pets Allowed</div>
-                      <div className="text-xs text-slate-500">
-                        อนุญาตให้เลี้ยงสัตว์เลี้ยง
-                      </div>
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                    <Checkbox
-                      id="smoking"
-                      checked={form.rules.smokingAllowed}
-                      onCheckedChange={(checked) =>
-                        update("rules.smokingAllowed", checked)
-                      }
-                    />
-                    <Label htmlFor="smoking" className="cursor-pointer flex-1">
-                      <div className="font-medium">Smoking Allowed</div>
-                      <div className="text-xs text-slate-500">อนุญาตให้สูบบุหรี่</div>
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                    <Checkbox
-                      id="sublease"
-                      checked={form.rules.subleaseAllowed}
-                      onCheckedChange={(checked) =>
-                        update("rules.subleaseAllowed", checked)
-                      }
-                    />
-                    <Label htmlFor="sublease" className="cursor-pointer flex-1">
-                      <div className="font-medium">Sublease Allowed</div>
-                      <div className="text-xs text-slate-500">อนุญาตให้ให้เช่าช่วง</div>
-                    </Label>
-                  </div>
-                </div>
-              </div>
+          
             </CardContent>
 
             <CardFooter className="justify-between">
