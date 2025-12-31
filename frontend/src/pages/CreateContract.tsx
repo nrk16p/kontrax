@@ -198,7 +198,44 @@ const ProgressStepper = ({
 }
 
 /* ================= VALIDATION ================= */
+function diffYearsMonths(start: string, end: string) {
+  const startDate = new Date(start)
+  const endDate = new Date(end)
 
+  let totalMonths =
+    (endDate.getFullYear() - startDate.getFullYear()) * 12 +
+    (endDate.getMonth() - startDate.getMonth())
+
+  // ถ้าวันสิ้นสุด < วันเริ่ม → ยังไม่ครบเดือน
+  if (endDate.getDate() < startDate.getDate()) {
+    totalMonths -= 1
+  }
+
+  totalMonths = Math.max(totalMonths, 0)
+
+  const years = Math.floor(totalMonths / 12)
+  const months = totalMonths % 12
+
+  return { years, months, totalMonths }
+}
+
+function formatDurationEN(years: number, months: number) {
+  const parts: string[] = []
+
+  if (years > 0) {
+    parts.push(`${years} ${years === 1 ? "year" : "years"}`)
+  }
+
+  if (months > 0) {
+    parts.push(`${months} ${months === 1 ? "month" : "months"}`)
+  }
+
+  return parts.length ? parts.join(" ") : "0 months"
+}
+const duration =
+  form.term.startDate && form.term.endDate
+    ? diffYearsMonths(form.term.startDate, form.term.endDate)
+    : null
 const validateStep = (step: number, form: ContractForm): ValidationErrors => {
   const errors: ValidationErrors = {}
 
@@ -854,12 +891,9 @@ export function CreateContract() {
                   <div className="text-sm space-y-1 text-slate-700">
                     <p>
                       <strong>Duration:</strong>{" "}
-                      {Math.ceil(
-                        (new Date(form.term.endDate).getTime() -
-                          new Date(form.term.startDate).getTime()) /
-                          (1000 * 60 * 60 * 24 * 30)
-                      )}{" "}
-                      months
+                      {duration
+                        ? formatDurationEN(duration.years, duration.months)
+                        : "-"}
                     </p>
                     <p>
                       <strong>Total Rent:</strong> ฿
