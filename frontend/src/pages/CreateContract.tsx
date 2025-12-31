@@ -232,10 +232,8 @@ function formatDurationEN(years: number, months: number) {
 
   return parts.length ? parts.join(" ") : "0 months"
 }
-const duration =
-  form.term.startDate && form.term.endDate
-    ? diffYearsMonths(form.term.startDate, form.term.endDate)
-    : null
+
+
 const validateStep = (step: number, form: ContractForm): ValidationErrors => {
   const errors: ValidationErrors = {}
 
