@@ -3,44 +3,44 @@ import cors from "cors"
 import helmet from "helmet"
 import rateLimit from "express-rate-limit"
 
+// Routes — each file exports a Router (not middleware functions)
 import authRoutes     from "./routes/auth"
 import contractRoutes from "./routes/contracts"
 import pdfRoutes      from "./routes/pdf"
 
 const app = express()
 
-// ─── Security middleware ──────────────────────────────────────────────────────
+// ─── Security ────────────────────────────────────────────────────────────────
 
-app.use(helmet())   // Sets secure HTTP headers (XSS, clickjacking, etc.)
+app.use(helmet())
 
 app.use(cors({
-  origin: process.env.FRONTEND_URL ?? "http://localhost:5173",
+  origin:      process.env.FRONTEND_URL ?? "http://localhost:5173",
   credentials: true,
 }))
 
-// Rate limiting — prevents brute-force and DoS attacks
 app.use(rateLimit({
-  windowMs: 15 * 60 * 1000,  // 15 minutes
-  max: 100,
+  windowMs:       15 * 60 * 1000,
+  max:            100,
   standardHeaders: true,
-  legacyHeaders: false,
-  message: { message: "Too many requests, please try again later" },
+  legacyHeaders:  false,
+  message:        { message: "Too many requests, please try again later" },
 }))
 
-app.use(express.json({ limit: "2mb" }))  // Cap payload size
+app.use(express.json({ limit: "2mb" }))
 
-// ─── Routes ───────────────────────────────────────────────────────────────────
+// ─── Routes ──────────────────────────────────────────────────────────────────
 
 app.get("/health", (_req, res) => res.json({ status: "ok" }))
 
-app.use("/api/auth",      authRoutes)
-app.use("/api/contracts", contractRoutes)
-app.use("/api",           pdfRoutes)
+app.use("/api/auth",      authRoutes)      // GET /api/auth/me, POST /api/auth/pdpa-consent
+app.use("/api/contracts", contractRoutes)  // CRUD on contracts
+app.use("/api",           pdfRoutes)       // GET /api/contracts/:id/pdf, POST /api/contracts/:id/sign
 
 // ─── Global error handler ────────────────────────────────────────────────────
 
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error("[Unhandled error]", err)
+  console.error("[Unhandled error]", err.message)
   res.status(500).json({ message: "Internal server error" })
 })
 
