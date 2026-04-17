@@ -1,105 +1,131 @@
-import { Request, Response } from "express"
-import bcrypt from "bcryptjs"
-import jwt from "jsonwebtoken"
-import { User } from "../models/User"
+import { Response } from "express"
+import { db, auth, COLLECTIONS } from "../config/firebase"
+import { Timestamp } from "firebase-admin/firestore"
+import { AuthRequest } from "../middleware/auth"
+import { UserDocument } from "../models/types"
 
-/* ======================================================
-   REGISTER
-====================================================== */
-export async function register(req: Request, res: Response) {
+// ─── GET /api/auth/me ─────────────────────────────────────────────────────────
+// Returns the Firestore profile for the currently authenticated user.
+// Creates it on first call (post-registration).
+
+export async function getMe(req: AuthRequest, res: Response) {
   try {
-    const { email, password, firstName, lastName } = req.body
+    const uid = req.user!.uid
+    const docRef = db.collection(COLLECTIONS.USERS).doc(uid)
+    const doc = await docRef.get()
 
-    // 1️⃣ Validate input (basic)
-    if (!email || !password || !firstName || !lastName) {
-      return res.status(400).json({
-        message: "Missing required fields",
-      })
+    if (!doc.exists) {
+      // First login — bootstrap profile from Firebase Auth record
+      const firebaseUser = await auth.getUser(uid)
+      const now = Timestamp.now()
+
+      const profile: UserDocument = {
+        uid,
+        email:       firebaseUser.email ?? "",
+        firstName:   firebaseUser.displayName?.split(" ")[0] ?? "",
+        lastName:    firebaseUser.displayName?.split(" ").slice(1).join(" ") ?? "",
+        role:        "user",
+        pdpaConsent: false,
+        createdAt:   now,
+        updatedAt:   now,
+      }
+
+      await docRef.set(profile)
+      return res.status(201).json(profile)
     }
 
-    // 2️⃣ Check existing user
-    const exists = await User.findOne({ email })
-    if (exists) {
-      return res.status(400).json({
-        message: "Email already registered",
-      })
-    }
-
-    // 3️⃣ Hash password
-    const hashed = await bcrypt.hash(password, 10)
-
-    // 4️⃣ Create user
-    const user = await User.create({
-      email,
-      password: hashed,
-      firstName,
-      lastName,
-    })
-
-    // 5️⃣ Sign JWT (IMPORTANT: payload must be consistent)
-    const token = jwt.sign(
-      {
-        userId: user._id,
-        firstName: user.firstName,
-      },
-      process.env.JWT_SECRET as string,
-      { expiresIn: "1d" }
-    )
-
-    return res.status(201).json({ token })
+    return res.json(doc.data())
   } catch (err) {
-    console.error("REGISTER ERROR:", err)
-    return res.status(500).json({
-      message: "Failed to register",
-    })
+    console.error("[getMe]", err)
+    return res.status(500).json({ message: "Failed to fetch profile" })
   }
 }
 
-/* ======================================================
-   LOGIN
-====================================================== */
-export async function login(req: Request, res: Response) {
+// ─── PATCH /api/auth/me ───────────────────────────────────────────────────────
+// Update displayable profile fields (not email — that's done via Firebase Auth)
+
+export async function updateMe(req: AuthRequest, res: Response) {
   try {
-    const { email, password } = req.body
+    const uid = req.user!.uid
+    const { firstName, lastName } = req.body
 
-    // 1️⃣ Validate input
-    if (!email || !password) {
-      return res.status(400).json({
-        message: "Email and password are required",
+    const updates: Partial<UserDocument> = {
+      updatedAt: Timestamp.now(),
+    }
+    if (firstName) updates.firstName = firstName
+    if (lastName)  updates.lastName  = lastName
+
+    await db.collection(COLLECTIONS.USERS).doc(uid).update(updates)
+
+    // Keep Firebase Auth displayName in sync
+    if (firstName || lastName) {
+      const current = (await db.collection(COLLECTIONS.USERS).doc(uid).get()).data() as UserDocument
+      await auth.updateUser(uid, {
+        displayName: `${updates.firstName ?? current.firstName} ${updates.lastName ?? current.lastName}`.trim(),
       })
     }
 
-    // 2️⃣ Find user
-    const user = await User.findOne({ email })
-    if (!user) {
-      return res.status(401).json({
-        message: "Invalid credentials",
-      })
-    }
-
-    // 3️⃣ Compare password
-    const ok = await bcrypt.compare(password, user.password)
-    if (!ok) {
-      return res.status(401).json({
-        message: "Invalid credentials",
-      })
-    }
-
-    // 4️⃣ Sign JWT (MUST MATCH REGISTER PAYLOAD)
-    const token = jwt.sign(
-      {
-        userId: user._id,
-        firstName: user.firstName, // ✅ CONSISTENT
-      },
-      process.env.JWT_SECRET as string,
-      { expiresIn: "1d" }
-    )
-
-    return res.json({ token })
+    return res.json({ message: "Profile updated" })
   } catch (err) {
-    console.error("LOGIN ERROR:", err)
-    return res.status(500).json({
-      message: "Failed to login",
+    console.error("[updateMe]", err)
+    return res.status(500).json({ message: "Failed to update profile" })
+  }
+}
+
+// ─── POST /api/auth/pdpa-consent ──────────────────────────────────────────────
+// Records PDPA consent with timestamp and IP for audit trail.
+
+export async function recordPdpaConsent(req: AuthRequest, res: Response) {
+  try {
+    const uid = req.user!.uid
+    const now = Timestamp.now()
+
+    await db.collection(COLLECTIONS.USERS).doc(uid).update({
+      pdpaConsent:   true,
+      pdpaConsentAt: now,
+      updatedAt:     now,
     })
+
+    // Write to audit log (server-side only, no client read access)
+    await db.collection(COLLECTIONS.AUDIT).add({
+      event:     "pdpa_consent",
+      uid,
+      ip:        req.ip ?? "unknown",
+      userAgent: req.headers["user-agent"] ?? "unknown",
+      timestamp: now,
+    })
+
+    return res.json({ message: "Consent recorded" })
+  } catch (err) {
+    console.error("[recordPdpaConsent]", err)
+    return res.status(500).json({ message: "Failed to record consent" })
+  }
+}
+
+// ─── POST /api/auth/set-role  (Admin only) ────────────────────────────────────
+// Assigns a Firebase custom claim role (e.g. promote a user to 'lawyer').
+// The user must sign out and back in for the new token to carry the claim.
+
+export async function setRole(req: AuthRequest, res: Response) {
+  try {
+    const { targetUid, role } = req.body as { targetUid: string; role: string }
+
+    if (!["user", "lawyer", "admin"].includes(role)) {
+      return res.status(400).json({ message: "Invalid role" })
+    }
+
+    // Set custom claim on Firebase Auth token
+    await auth.setCustomUserClaims(targetUid, { role })
+
+    // Mirror in Firestore profile
+    await db.collection(COLLECTIONS.USERS).doc(targetUid).update({
+      role,
+      updatedAt: Timestamp.now(),
+    })
+
+    return res.json({ message: `Role '${role}' assigned to ${targetUid}` })
+  } catch (err) {
+    console.error("[setRole]", err)
+    return res.status(500).json({ message: "Failed to set role" })
   }
 }
