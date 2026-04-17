@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Sarabun', 'TH Sarabun New', serif; font-size: 14pt; line-height: 1.8; color: #111; background: #fff; }
+  .page { width: 210mm; min-height: 297mm; padding: 20mm 25mm; margin: 0 auto; }
+  h1 { text-align: center; font-size: 18pt; font-weight: 700; margin-bottom: 6pt; }
+  .subtitle { text-align: center; font-size: 12pt; color: #555; margin-bottom: 24pt; }
+  .contract-no { text-align: right; font-size: 11pt; color: #666; margin-bottom: 16pt; }
+  .section { margin-bottom: 16pt; }
+  .section-title { font-weight: 700; font-size: 14pt; border-bottom: 1.5px solid #222; padding-bottom: 3pt; margin-bottom: 8pt; }
+  .party-block { background: #f9f9f9; border-left: 3px solid #333; padding: 10pt 14pt; margin: 8pt 0 12pt; border-radius: 0 4px 4px 0; }
+  .party-block p { margin: 3pt 0; }
+  table.terms { width: 100%; border-collapse: collapse; margin: 8pt 0 16pt; font-size: 13pt; }
+  table.terms td { padding: 6pt 10pt; border: 0.5px solid #ccc; vertical-align: top; }
+  table.terms td:first-child { width: 40%; background: #f4f4f4; font-weight: 600; }
+  .clause { margin: 8pt 0; padding-left: 14pt; }
+  .clause-num { font-weight: 600; }
+  .signature-section { margin-top: 40pt; page-break-inside: avoid; }
+  .sig-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24pt; margin-top: 16pt; }
+  .sig-box { text-align: center; }
+  .sig-image { height: 70px; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #333; margin-bottom: 6pt; }
+  .sig-image img { max-height: 65px; max-width: 200px; }
+  .sig-label { font-size: 12pt; color: #555; }
+  .sig-name { font-weight: 600; font-size: 13pt; margin-top: 2pt; }
+  .sig-date { font-size: 11pt; color: #666; }
+  .watermark { position: fixed; bottom: 8mm; right: 10mm; font-size: 9pt; color: #bbb; }
+  .pdpa-notice { background: #f0f4ff; border: 0.5px solid #b0c4ee; border-radius: 4px; padding: 8pt 12pt; font-size: 11pt; color: #3a4a7a; margin-top: 20pt; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <p class="contract-no">เลขที่สัญญา: {{contractNo}}</p>
+  <h1>สัญญาจ้างงาน</h1>
+  <p class="subtitle">Employment Contract · ตาม พ.ร.บ. คุ้มครองแรงงาน พ.ศ. 2541</p>
+
+  <p style="text-align:center; margin-bottom:20pt; font-size:13pt;">
+    ทำขึ้น ณ วันที่ {{startDate}} | จัดทำโดย Kontrax
+  </p>
+
+  <div class="section">
+    <p class="section-title">คู่สัญญา</p>
+    <p><strong>นายจ้าง (Employer)</strong></p>
+    <div class="party-block">
+      <p>ชื่อ/บริษัท: <strong>{{employerName}}</strong></p>
+      <p>ที่อยู่: {{employerAddress}}</p>
+    </div>
+    <p><strong>ลูกจ้าง (Employee)</strong></p>
+    <div class="party-block">
+      <p>ชื่อ: <strong>{{employeeName}}</strong></p>
+      <p>เลขบัตรประชาชน: {{employeeId}}</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <p class="section-title">รายละเอียดการจ้างงาน</p>
+    <table class="terms">
+      <tr><td>ตำแหน่งงาน</td><td><strong>{{position}}</strong></td></tr>
+      <tr><td>เงินเดือน</td><td><strong>{{salary}} บาท/เดือน</strong></td></tr>
+      <tr><td>วันเริ่มงาน</td><td>{{startDate}}</td></tr>
+      <tr><td>ชั่วโมงทำงาน</td><td>{{workHours}}</td></tr>
+      <tr><td>ระยะทดลองงาน</td><td>{{probationDays}} วัน</td></tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <p class="section-title">ข้อกำหนดและเงื่อนไข</p>
+    <div class="clause"><span class="clause-num">ข้อ 1</span> ลูกจ้างตกลงทำงานในตำแหน่ง {{position}} ตามหน้าที่ที่นายจ้างมอบหมาย</div>
+    <div class="clause"><span class="clause-num">ข้อ 2</span> นายจ้างจะจ่ายเงินเดือน {{salary}} บาท ภายในวันสุดท้ายของแต่ละเดือน</div>
+    <div class="clause"><span class="clause-num">ข้อ 3</span> ระยะทดลองงาน {{probationDays}} วัน นายจ้างอาจเลิกจ้างได้โดยไม่ต้องให้เหตุผลและไม่ต้องจ่ายค่าชดเชย</div>
+    <div class="clause"><span class="clause-num">ข้อ 4</span> หลังพ้นระยะทดลองงาน การเลิกจ้างต้องเป็นไปตาม พ.ร.บ. คุ้มครองแรงงาน พ.ศ. 2541</div>
+    <div class="clause"><span class="clause-num">ข้อ 5</span> ลูกจ้างต้องรักษาความลับทางธุรกิจของนายจ้าง แม้หลังสิ้นสุดสัญญาจ้าง</div>
+  </div>
+
+  <div class="pdpa-notice">
+    🔐 <strong>นโยบายคุ้มครองข้อมูลส่วนบุคคล (PDPA)</strong><br>
+    ข้อมูลส่วนบุคคลของคู่สัญญาถูกจัดเก็บตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562
+    คู่สัญญาทุกฝ่ายได้ให้ความยินยอมเมื่อ {{consentTimestamp}}
+  </div>
+
+  <div class="signature-section">
+    <p class="section-title">ลายมือชื่อคู่สัญญา</p>
+    <div class="sig-grid">
+      <div class="sig-box">
+        <div class="sig-image">
+          {{#if employerSignature}}
+            <img src="{{employerSignature}}" alt="employer signature"/>
+          {{else}}
+            <span style="color:#bbb; font-size:12pt;">ยังไม่ได้ลงนาม</span>
+          {{/if}}
+        </div>
+        <p class="sig-name">{{employerName}}</p>
+        <p class="sig-label">นายจ้าง (Employer)</p>
+        <p class="sig-date">วันที่: {{employerSignedAt}}</p>
+      </div>
+      <div class="sig-box">
+        <div class="sig-image">
+          {{#if employeeSignature}}
+            <img src="{{employeeSignature}}" alt="employee signature"/>
+          {{else}}
+            <span style="color:#bbb; font-size:12pt;">ยังไม่ได้ลงนาม</span>
+          {{/if}}
+        </div>
+        <p class="sig-name">{{employeeName}}</p>
+        <p class="sig-label">ลูกจ้าง (Employee)</p>
+        <p class="sig-date">วันที่: {{employeeSignedAt}}</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+<p class="watermark">จัดทำโดย Kontrax · kontrax.vercel.app · เอกสารอิเล็กทรอนิกส์ที่มีผลทางกฎหมาย</p>
+</body>
+</html>
