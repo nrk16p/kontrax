@@ -1,63 +1,26 @@
-import { Request, Response, NextFunction } from "express"
-import { auth } from "../config/firebase"
+import { Router } from "express"
+import { requireAuth, requireRole } from "../middleware/auth"
+import {
+  getMe,
+  updateMe,
+  recordPdpaConsent,
+  setRole,
+} from "../controllers/auth.controller"
 
-// ─── Augment Express Request ──────────────────────────────────────────────────
+const router = Router()
 
-export interface AuthRequest extends Request {
-  user?: {
-    uid:   string
-    email: string | undefined
-    role:  "user" | "lawyer" | "admin"
-  }
-}
+// All auth routes require a valid Firebase ID token
+router.use(requireAuth)
 
-// ─── requireAuth ─────────────────────────────────────────────────────────────
-// Drop-in replacement for the old JWT requireAuth middleware.
-// Clients must send:  Authorization: Bearer <firebase_id_token>
+// GET  /api/auth/me            → fetch or bootstrap Firestore user profile
+// PATCH /api/auth/me           → update first/last name
+router.get("/me",   getMe)
+router.patch("/me", updateMe)
 
-export async function requireAuth(
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-) {
-  const header = req.headers.authorization
+// POST /api/auth/pdpa-consent  → record PDPA consent with audit trail
+router.post("/pdpa-consent", recordPdpaConsent)
 
-  if (!header?.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "Missing or invalid Authorization header" })
-  }
+// POST /api/auth/set-role      → admin only: promote user to lawyer/admin
+router.post("/set-role", requireRole("admin"), setRole)
 
-  const idToken = header.split("Bearer ")[1]
-
-  try {
-    const decoded = await auth.verifyIdToken(idToken)
-
-    req.user = {
-      uid:   decoded.uid,
-      email: decoded.email,
-      // Custom claim set via auth.setCustomUserClaims() when lawyer/admin is assigned
-      role:  (decoded.role as "user" | "lawyer" | "admin") ?? "user",
-    }
-
-    next()
-  } catch (err) {
-    console.error("[requireAuth] Token verification failed:", err)
-    return res.status(401).json({ message: "Invalid or expired token" })
-  }
-}
-
-// ─── requireRole ─────────────────────────────────────────────────────────────
-// Usage: router.post("/templates", requireAuth, requireRole("lawyer"), handler)
-
-export function requireRole(...roles: Array<"user" | "lawyer" | "admin">) {
-  return (req: AuthRequest, res: Response, next: NextFunction) => {
-    if (!req.user) {
-      return res.status(401).json({ message: "Unauthenticated" })
-    }
-    if (!roles.includes(req.user.role)) {
-      return res.status(403).json({
-        message: `Access denied. Requires role: ${roles.join(" or ")}`,
-      })
-    }
-    next()
-  }
-}
+export default router
