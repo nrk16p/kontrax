@@ -1,3 +1,2 @@
-// This file previously had a duplicate renderTemplate function.
-// All PDF generation now goes through generate.ts.
+// Previously a duplicate of generate.ts. Now a clean re-export.
 export { generatePdf } from "./generate"
