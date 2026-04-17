@@ -1,56 +1,42 @@
 import path from "path"
 import fs from "fs"
-import Handlebars from "handlebars"
+import Handlebars from "handlebars"   // Fix #8: consistent capitalisation
 import puppeteer from "puppeteer-core"
 
 // ─── Template cache ───────────────────────────────────────────────────────────
 
-const templateCache = new Map<string, HandlebarsTemplateDelegate>()
+const cache = new Map<string, HandlebarsTemplateDelegate>()
 
-// ─── FIX 1: Use __dirname instead of process.cwd() ───────────────────────────
-// process.cwd() breaks after compilation because it points to wherever the
-// process was launched from, not the file's location.
-// __dirname always resolves relative to THIS file.
+// Fix #7: __dirname resolves relative to THIS file after compilation.
+// process.cwd() was wrong — it resolves from wherever node was launched.
 
-function getTemplatePath(templateName: string): string {
-  return path.join(__dirname, "templates", templateName)
-}
+function loadTemplate(name: string): HandlebarsTemplateDelegate {
+  if (cache.has(name)) return cache.get(name)!
 
-function loadTemplate(templateName: string): HandlebarsTemplateDelegate {
-  if (templateCache.has(templateName)) {
-    return templateCache.get(templateName)!
-  }
+  const filePath = path.join(__dirname, "templates", name)
 
-  const filePath = getTemplatePath(templateName)
-
-  // FIX: Explicit "file not found" error instead of cryptic crash
   if (!fs.existsSync(filePath)) {
-    throw new Error(`Template not found: ${filePath}`)
+    throw new Error(`[generatePdf] Template not found: ${filePath}`)
   }
 
-  const source   = fs.readFileSync(filePath, "utf-8")
-  const compiled = Handlebars.compile(source)
-  templateCache.set(templateName, compiled)
+  const compiled = Handlebars.compile(fs.readFileSync(filePath, "utf-8"))
+  cache.set(name, compiled)
   return compiled
 }
 
-// ─── Main PDF generator ───────────────────────────────────────────────────────
+// ─── generatePdf ─────────────────────────────────────────────────────────────
 
 export async function generatePdf(
   templateName: string,
   data: Record<string, unknown>
 ): Promise<Buffer> {
 
-  // Render HTML from Handlebars template
-  const render = loadTemplate(templateName)
-  const html   = render(data)
+  const html = loadTemplate(templateName)(data)
 
-  // FIX 2: Use PUPPETEER_EXECUTABLE_PATH (was incorrectly CHROME_PATH)
+  // Fix: PUPPETEER_EXECUTABLE_PATH (not CHROME_PATH)
   const executablePath =
-    process.env.PUPPETEER_EXECUTABLE_PATH ??
-    "/usr/bin/google-chrome-stable"
+    process.env.PUPPETEER_EXECUTABLE_PATH ?? "/usr/bin/google-chrome-stable"
 
-  // FIX 3: Added timeout + proper error handling around Puppeteer
   let browser
   try {
     browser = await puppeteer.launch({
@@ -65,12 +51,7 @@ export async function generatePdf(
     })
 
     const page = await browser.newPage()
-
-    // Timeout after 30s if page never loads
-    await page.setContent(html, {
-      waitUntil: "networkidle0",
-      timeout:   30_000,
-    })
+    await page.setContent(html, { waitUntil: "networkidle0", timeout: 30_000 })
 
     const pdf = await page.pdf({
       format:          "A4",
@@ -81,11 +62,8 @@ export async function generatePdf(
     return Buffer.from(pdf)
 
   } catch (err) {
-    console.error("[generatePdf] Puppeteer error:", err)
-    throw new Error("PDF generation failed: " + (err as Error).message)
-
+    throw new Error("[generatePdf] " + (err as Error).message)
   } finally {
-    // Always close browser even if generation fails
     if (browser) await browser.close()
   }
 }
