@@ -11,9 +11,9 @@ export interface AuthRequest extends Request {
   }
 }
 
-// ─── requireAuth ─────────────────────────────────────────────────────────────
-// Drop-in replacement for the old JWT requireAuth middleware.
-// Clients must send:  Authorization: Bearer <firebase_id_token>
+// ─── requireAuth ──────────────────────────────────────────────────────────────
+// Verifies Firebase ID token on every protected request.
+// Usage: router.get("/me", requireAuth, handler)
 
 export async function requireAuth(
   req: AuthRequest,
@@ -30,14 +30,11 @@ export async function requireAuth(
 
   try {
     const decoded = await auth.verifyIdToken(idToken)
-
     req.user = {
       uid:   decoded.uid,
       email: decoded.email,
-      // Custom claim set via auth.setCustomUserClaims() when lawyer/admin is assigned
       role:  (decoded.role as "user" | "lawyer" | "admin") ?? "user",
     }
-
     next()
   } catch (err) {
     console.error("[requireAuth] Token verification failed:", err)
@@ -46,7 +43,8 @@ export async function requireAuth(
 }
 
 // ─── requireRole ─────────────────────────────────────────────────────────────
-// Usage: router.post("/templates", requireAuth, requireRole("lawyer"), handler)
+// Role guard — use AFTER requireAuth.
+// Usage: router.post("/set-role", requireAuth, requireRole("admin"), handler)
 
 export function requireRole(...roles: Array<"user" | "lawyer" | "admin">) {
   return (req: AuthRequest, res: Response, next: NextFunction) => {
