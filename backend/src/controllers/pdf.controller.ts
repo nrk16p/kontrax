@@ -24,9 +24,9 @@ const TEMPLATE_MAP: Record<string, string> = {
 
 // ─── Compile and cache Handlebars templates ───────────────────────────────────
 
-const templateCache = new Map<string, HandlebarsTemplateDelegate>()
+const templateCache = new Map<string, ReturnType<typeof Handlebars.compile>>()
 
-function loadTemplate(name: string): HandlebarsTemplateDelegate {
+function loadTemplate(name: string): ReturnType<typeof Handlebars.compile> {
   if (templateCache.has(name)) return templateCache.get(name)!
 
   const filePath = path.join(__dirname, `../pdf/contracts/${name}.hbs`)

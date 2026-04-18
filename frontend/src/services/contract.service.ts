@@ -1,31 +1,21 @@
-// frontend/src/services/contracts.service.ts
+import { getAuth } from "firebase/auth"
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:4000/api"
 const API_PATH = "/contracts"
 
-/* -----------------------------
-   Auth helper
------------------------------- */
-function getToken() {
-  const token = localStorage.getItem("token")
-  if (!token) throw new Error("Not authenticated")
-  return token
+async function authHeaders(): Promise<Record<string, string>> {
+  const user = getAuth().currentUser
+  if (!user) throw new Error("Not authenticated")
+  const token = await user.getIdToken()
+  return { Authorization: `Bearer ${token}` }
 }
 
-function logout() {
-  localStorage.removeItem("token")
-  window.location.href = "/login"
-}
-
-/* -----------------------------
-   Response handler
------------------------------- */
-async function handleAuthResponse(res: Response) {
+async function handleResponse(res: Response) {
   if (res.status === 401) {
-    logout()
+    await getAuth().signOut()
+    window.location.href = "/login"
     throw new Error("Unauthorized")
   }
-
   if (!res.ok) {
     let message = "Request failed"
     try {
@@ -34,32 +24,21 @@ async function handleAuthResponse(res: Response) {
     } catch (_) {}
     throw new Error(message)
   }
-
   return res.json()
 }
 
-/* -----------------------------
-   API calls
------------------------------- */
 export async function getContracts() {
   const res = await fetch(`${API_BASE}${API_PATH}`, {
-    headers: {
-      Authorization: `Bearer ${getToken()}`,
-    },
+    headers: await authHeaders(),
   })
-
-  return handleAuthResponse(res)
+  return handleResponse(res)
 }
 
-export async function createContract(payload: any) {
+export async function createContract(payload: unknown) {
   const res = await fetch(`${API_BASE}${API_PATH}`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${getToken()}`,
-    },
+    headers: { "Content-Type": "application/json", ...(await authHeaders()) },
     body: JSON.stringify(payload),
   })
-
-  return handleAuthResponse(res)
+  return handleResponse(res)
 }

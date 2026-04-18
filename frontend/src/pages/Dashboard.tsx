@@ -28,7 +28,7 @@ import { getContracts } from "../services/contract.service"
 
 /* ---------------- Types ---------------- */
 interface Contract {
-  _id: string
+  id: string
   contractNo: string
   tenantName: string
   propertyAddress: string
@@ -63,19 +63,22 @@ export function Dashboard() {
   /* ---------------- Helpers ---------------- */
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "Active":
-        return <Badge variant="success">Active</Badge>
-      case "Pending":
+      case "active":
+      case "signed":
+        return <Badge variant="success">{status}</Badge>
+      case "pending_signature":
         return <Badge variant="warning">Pending</Badge>
-      case "Draft":
+      case "draft":
         return <Badge variant="secondary">Draft</Badge>
+      case "terminated":
+        return <Badge variant="secondary">Terminated</Badge>
       default:
         return <Badge>{status}</Badge>
     }
   }
 
   const filtered = contracts.filter((c) =>
-    `${c.contractNo} ${c.tenantName} ${c.propertyAddress}`
+    `${c.contractNo ?? ""} ${c.tenantName ?? ""} ${c.propertyAddress ?? ""}`
       .toLowerCase()
       .includes(searchTerm.toLowerCase())
   )
@@ -113,7 +116,7 @@ export function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {contracts.filter(c => c.status === "Active").length}
+              {contracts.filter(c => c.status === "active" || c.status === "signed").length}
             </div>
           </CardContent>
         </Card>
@@ -127,7 +130,7 @@ export function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {contracts.filter(c => c.status === "Pending").length}
+              {contracts.filter(c => c.status === "pending_signature").length}
             </div>
           </CardContent>
         </Card>
@@ -198,10 +201,10 @@ export function Dashboard() {
 
               <TableBody>
                 {filtered.map((c) => (
-                  <TableRow key={c._id}>
+                  <TableRow key={c.id}>
                     <TableCell className="font-medium">
                       <Link
-                        to={`/contract/${c._id}`}
+                        to={`/contracts/${c.id}/sign`}
                         className="text-blue-600 hover:underline"
                       >
                         {c.contractNo}

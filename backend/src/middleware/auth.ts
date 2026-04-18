@@ -26,7 +26,7 @@ export async function requireAuth(
     return res.status(401).json({ message: "Missing or invalid Authorization header" })
   }
 
-  const idToken = header.split("Bearer ")[1]
+  const idToken = header.split("Bearer ")[1]?.trim()
 
   try {
     const decoded = await auth.verifyIdToken(idToken)
