@@ -1,6 +1,6 @@
 // frontend/src/services/auth.service.ts
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || ""
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:4000/api"
 
 async function handleResponse(res: Response) {
   if (!res.ok) {
@@ -15,7 +15,7 @@ async function handleResponse(res: Response) {
 }
 
 export async function login(email: string, password: string) {
-  const res = await fetch(`${API_BASE}/api/auth/login`, {
+  const res = await fetch(`${API_BASE}/auth/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -32,7 +32,7 @@ export async function register(payload: {
   firstName: string
   lastName: string
 }) {
-  const res = await fetch(`${API_BASE}/api/auth/register`, {
+  const res = await fetch(`${API_BASE}/auth/register`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

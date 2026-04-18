@@ -58,7 +58,7 @@ export interface Termination {
 
 // ─── Contract Status & Type ───────────────────────────────────────────────────
 
-export type ContractType   = "house" | "condo" | "dorm" | "commercial"
+export type ContractType   = "house" | "condo" | "dorm" | "commercial" | "employment"
 
 export type ContractStatus =
   | "draft"
@@ -102,6 +102,18 @@ export interface ContractDocument {
   inventory?:   InventoryItem[]
   rules?:       Rules
   termination?: Termination
+
+  specialConditions?: string
+  position?:          string
+  workHours?:         string
+  probationDays?:     string
+
+  signatures?: {
+    landlord?:  string
+    tenant?:    string
+    employer?:  string
+    employee?:  string
+  }
 
   signedAt?:     Timestamp
   signedPdfUrl?: string         // Firebase Storage URL after signing

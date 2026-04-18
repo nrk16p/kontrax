@@ -29,7 +29,7 @@ const templateCache = new Map<string, HandlebarsTemplateDelegate>()
 function loadTemplate(name: string): HandlebarsTemplateDelegate {
   if (templateCache.has(name)) return templateCache.get(name)!
 
-  const filePath = path.join(__dirname, `../templates/contracts/${name}.hbs`)
+  const filePath = path.join(__dirname, `../pdf/contracts/${name}.hbs`)
   if (!fs.existsSync(filePath)) {
     throw new Error(`Template not found: ${name}.hbs`)
   }
@@ -82,15 +82,15 @@ function buildTemplateData(contract: ContractDocument, signedAt: string): Record
         rentAmount:         f.rentAmount?.toLocaleString("th-TH")   ?? "0",
         depositAmount:      f.depositAmount?.toLocaleString("th-TH") ?? "0",
         paymentDueDay:      f.dueDay ?? "สิ้นเดือน",
-        specialConditions:  (contract as any).specialConditions ?? "",
-        landlordSignature:  (contract as any).signatures?.landlord ?? null,
-        tenantSignature:    (contract as any).signatures?.tenant   ?? null,
-        landlordSignedAt:   (contract as any).signedAt ? fmt((contract as any).signedAt) : "-",
-        tenantSignedAt:     (contract as any).signedAt ? fmt((contract as any).signedAt) : "-",
+        specialConditions:  contract.specialConditions ?? "",
+        landlordSignature:  contract.signatures?.landlord ?? null,
+        tenantSignature:    contract.signatures?.tenant   ?? null,
+        landlordSignedAt:   contract.signedAt ? fmt(contract.signedAt) : "-",
+        tenantSignedAt:     contract.signedAt ? fmt(contract.signedAt) : "-",
       }
     }
 
-    case "employment" as any: {
+    case "employment": {
       const er = contract.parties?.landlord ?? {}  // employer stored as "landlord"
       const ee = contract.parties?.tenant   ?? {}  // employee stored as "tenant"
       const f  = contract.finance ?? {}
@@ -100,14 +100,14 @@ function buildTemplateData(contract: ContractDocument, signedAt: string): Record
         employerAddress:   er.address   ?? "",
         employeeName:      ee.fullName  ?? "",
         employeeId:        maskId(ee.idNo),
-        position:          (contract as any).position ?? "",
+        position:          contract.position ?? "",
         salary:            f.rentAmount?.toLocaleString("th-TH") ?? "0",
-        workHours:         (contract as any).workHours ?? "40 ชั่วโมง",
-        probationDays:     (contract as any).probationDays ?? "90",
-        employerSignature: (contract as any).signatures?.landlord ?? null,
-        employeeSignature: (contract as any).signatures?.tenant   ?? null,
-        employerSignedAt:  (contract as any).signedAt ? fmt((contract as any).signedAt) : "-",
-        employeeSignedAt:  (contract as any).signedAt ? fmt((contract as any).signedAt) : "-",
+        workHours:         contract.workHours ?? "40 ชั่วโมง",
+        probationDays:     contract.probationDays ?? "90",
+        employerSignature: contract.signatures?.employer ?? null,
+        employeeSignature: contract.signatures?.employee ?? null,
+        employerSignedAt:  contract.signedAt ? fmt(contract.signedAt) : "-",
+        employeeSignedAt:  contract.signedAt ? fmt(contract.signedAt) : "-",
       }
     }
 
@@ -212,7 +212,8 @@ export async function saveSignature(req: AuthRequest, res: Response) {
   }
 
   // Validate it's a real base64 PNG/JPEG (security: don't store arbitrary strings)
-  if (!signatureDataUrl.startsWith("data:image/")) {
+  const validImagePrefix = /^data:image\/(png|jpeg|jpg);base64,[A-Za-z0-9+/]+=*$/.test(signatureDataUrl)
+  if (!validImagePrefix) {
     return res.status(400).json({ message: "Invalid signature format" })
   }
 

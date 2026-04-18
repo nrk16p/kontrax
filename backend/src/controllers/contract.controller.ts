@@ -1,5 +1,5 @@
 import { Response } from "express"
-import { FieldValue, Timestamp } from "firebase-admin/firestore"
+import { Timestamp } from "firebase-admin/firestore"
 import { db, COLLECTIONS } from "../config/firebase"
 import { AuthRequest } from "../middleware/auth"
 import { ContractDocument, ContractStatus, ContractType } from "../models/types"
@@ -18,7 +18,7 @@ export async function createContract(req: AuthRequest, res: Response) {
     const uid = req.user!.uid
     const body = req.body as Partial<ContractDocument>
 
-    if (!body.type || !["house", "condo", "dorm", "commercial"].includes(body.type)) {
+    if (!body.type || !["house", "condo", "dorm", "commercial", "employment"].includes(body.type)) {
       return res.status(400).json({ message: "Invalid or missing contract type" })
     }
 

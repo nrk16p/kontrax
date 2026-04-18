@@ -1,7 +1,7 @@
 import { getAuth } from 'firebase/auth';
 import type { ContractTemplate, ContractFormData, ApiResponse, PaginatedResponse } from '../types/contract';
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3001/api';
+const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:4000/api';
 
 // ─── Helper: get Firebase ID token ───────────────────────────────────────────
 
